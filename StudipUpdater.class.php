@@ -9,25 +9,42 @@ class StudipUpdater extends StudIPPlugin implements SystemPlugin {
         if (!$GLOBALS['perm']->have_perm("root")) {
             return;
         }
-        if (stripos($_SERVER['REQUEST_URI'], "dispatch.php/start") !== false) {
+        if ((stripos($_SERVER['REQUEST_URI'], "dispatch.php/start") !== false ) || (stripos($_SERVER['REQUEST_URI'], "index.php") !== false)) {
             $versions = $this->getVersions();
             $new_version = false;
             $new_service_release = false;
             foreach ($versions as $number => $version) {
-                if ($new_version === false && version_compare($number, $GLOBALS['SOFTWARE_VERSION'], ">")) {
+                $my_version = explode(".", $GLOBALS['SOFTWARE_VERSION']);
+                $their_version = explode(".", $number);
+                if ($new_version === false
+                        && (($my_version[0] !== $their_version[0])
+                            || ($my_version[1] !== $their_version[1]))
+                        && version_compare($number, $GLOBALS['SOFTWARE_VERSION'], ">")) {
                     $new_version = $number;
                 }
                 if (($new_service_release === false)
-                        && (substr($number, 0, -1) === substr($GLOBALS['SOFTWARE_VERSION'], 0, -1))
+                        && ($my_version[0] == $their_version[0])
+                        && ($my_version[1] == $their_version[1])
                         && version_compare($number, $GLOBALS['SOFTWARE_VERSION'], ">")) {
                     $new_service_release = $number;
                 }
             }
             if ($new_service_release) {
-                PageLayout::postMessage(MessageBox::info(sprintf(_("Service Release %s ist verfügbar. Bitte updaten Sie so schnell wie möglich."), $new_service_release)));
+                $message = MessageBox::info(sprintf(_("Service Release %s ist verfügbar. Bitte updaten Sie so schnell wie möglich."), $new_service_release));
+                if (stripos($_SERVER['REQUEST_URI'], "index.php") !== false) {
+                    PageLayout::addBodyElements($message);
+                } else {
+                    PageLayout::postMessage($message);
+                }
+
             }
             if ($new_version) {
-                PageLayout::postMessage(MessageBox::info(sprintf(_("Neue Stud.IP Version %s ist verfügbar."), $new_version)));
+                $message = MessageBox::info(sprintf(_("Neue Stud.IP Version %s ist verfügbar."), $new_version));
+                if (stripos($_SERVER['REQUEST_URI'], "index.php") !== false) {
+                    PageLayout::addBodyElements($message);
+                } else {
+                    PageLayout::postMessage($message);
+                }
             }
         }
     }
