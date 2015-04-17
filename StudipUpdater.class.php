@@ -30,7 +30,10 @@ class StudipUpdater extends StudIPPlugin implements SystemPlugin {
                 }
             }
             if ($new_service_release) {
-                $message = MessageBox::info(sprintf(_("Service Release %s ist verfügbar. Bitte updaten Sie so schnell wie möglich."), $new_service_release));
+                $message = MessageBox::info(
+                    sprintf(_("Service Release %s ist verfügbar. Bitte updaten Sie so schnell wie möglich."), $new_service_release),
+                    array('<a href="'.$versions[$new_service_release]['link'].'" target="_blank">'.Assets::img("icons/blue/20/download").' '._("Jetzt downloaden").'</a>')
+                );
                 if (stripos($_SERVER['REQUEST_URI'], "index.php") !== false) {
                     PageLayout::addBodyElements($message);
                 } else {
@@ -39,7 +42,10 @@ class StudipUpdater extends StudIPPlugin implements SystemPlugin {
 
             }
             if ($new_version) {
-                $message = MessageBox::info(sprintf(_("Neue Stud.IP Version %s ist verfügbar."), $new_version));
+                $message = MessageBox::info(sprintf(
+                    _("Neue Stud.IP Version %s ist verfügbar."), $new_version),
+                    array('<a href="'.$versions[$new_version]['link'].'" target="_blank">'.Assets::img("icons/blue/20/download").' '._("Jetzt downloaden").'</a>')
+                );
                 if (stripos($_SERVER['REQUEST_URI'], "index.php") !== false) {
                     PageLayout::addBodyElements($message);
                 } else {
