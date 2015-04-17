@@ -9,6 +9,8 @@ class StudipUpdater extends StudIPPlugin implements SystemPlugin {
         if (!$GLOBALS['perm']->have_perm("root")) {
             return;
         }
+        $tab = new Navigation(_("Stud.IP Update"), PluginEngine::getURL($this, array(), "updater/index"));
+        Navigation::addItem("/tools/studipupdate", $tab);
         if ((stripos($_SERVER['REQUEST_URI'], "dispatch.php/start") !== false ) || (stripos($_SERVER['REQUEST_URI'], "index.php") !== false)) {
             $versions = $this->getVersions();
             $new_version = false;
@@ -32,7 +34,10 @@ class StudipUpdater extends StudIPPlugin implements SystemPlugin {
             if ($new_service_release) {
                 $message = MessageBox::info(
                     sprintf(_("Service Release %s ist verfügbar. Bitte updaten Sie so schnell wie möglich."), $new_service_release),
-                    array('<a href="'.$versions[$new_service_release]['link'].'" target="_blank">'.Assets::img("icons/20/blue/download", array('class' => "text-bottom")).' '._("Jetzt downloaden").'</a>')
+                    array(
+                        '<a href="'.$versions[$new_service_release]['link'].'" target="_blank">'.Assets::img("icons/20/blue/download", array('class' => "text-bottom")).' '._("Jetzt downloaden").'</a>',
+                        '<a href="'.PluginEngine::getLink($this, array(), "updater/index").'" target="_blank">'.Assets::img("icons/20/blue/upload", array('class' => "text-bottom")).' '._("Heruntergeladenes ZIP einspielen").'</a>'
+                    )
                 );
                 if (stripos($_SERVER['REQUEST_URI'], "index.php") !== false) {
                     PageLayout::addBodyElements($message);
@@ -44,7 +49,10 @@ class StudipUpdater extends StudIPPlugin implements SystemPlugin {
             if ($new_version) {
                 $message = MessageBox::info(sprintf(
                     _("Neue Stud.IP Version %s ist verfügbar."), $new_version),
-                    array('<a href="'.$versions[$new_version]['link'].'" target="_blank">'.Assets::img("icons/20/blue/download", array('class' => "text-bottom")).' '._("Jetzt downloaden").'</a>')
+                    array(
+                        '<a href="'.$versions[$new_version]['link'].'" target="_blank">'.Assets::img("icons/20/blue/download", array('class' => "text-bottom")).' '._("Jetzt downloaden").'</a>',
+                        '<a href="'.PluginEngine::getLink($this, array(), "updater/index").'" target="_blank">'.Assets::img("icons/20/blue/upload", array('class' => "text-bottom")).' '._("Heruntergeladenes ZIP einspielen").'</a>'
+                    )
                 );
                 if (stripos($_SERVER['REQUEST_URI'], "index.php") !== false) {
                     PageLayout::addBodyElements($message);
