@@ -63,7 +63,11 @@ class StudipUpdater extends StudIPPlugin implements SystemPlugin {
         }
     }
 
-    protected function getVersions() {
+    protected function getVersions($force = false) {
+        $cache = StudipCacheFactory::getCache();
+        if (!$force && $cache->read("STUDIP_UPDATER_STUDIP_VERSIONS")) {
+            return unserialize($cache->read("STUDIP_UPDATER_STUDIP_VERSIONS"));
+        }
         $atom = DOMDocument::loadXML(file_get_contents(self::$rssURL));
         $versions = array();
         foreach ($atom->getElementsByTagName("item") as $item) {
@@ -80,6 +84,7 @@ class StudipUpdater extends StudIPPlugin implements SystemPlugin {
                 }
             }
         }
+        $cache->write("STUDIP_UPDATER_STUDIP_VERSIONS", serialize($versions), 10 * 60);
         return $versions;
     }
 }
