@@ -2,3 +2,4 @@ pluginname=StudipUpdater
 pluginclassname=StudipUpdater
 version=2.0
 origin=RasmusFuhse
+studipMinVersion=2.4

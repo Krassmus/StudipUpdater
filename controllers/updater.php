@@ -149,7 +149,7 @@ class UpdaterController extends PluginController {
             }
 
             $this->postMessage(MessageBox::success(_("Programmdateien erfolgreich geupdated.")));
-            header("Location: ".$GLOBALS['ABSOLUTE_URI_STUDIP']."web_migrate.php");
+            header("Location: ".URLHelper::getURL("web_migrate.php"));
         }
         $this->render_nothing();
     }
