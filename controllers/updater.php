@@ -1,6 +1,10 @@
 <?php
 
-require_once 'app/controllers/plugin_controller.php';
+if (file_exists('app/controllers/plugin_controller.php')) {
+    include_once 'app/controllers/plugin_controller.php';
+} else {
+    include_once __DIR__."/plugin_controller.php";
+}
 
 class UpdaterController extends PluginController {
 
@@ -9,7 +13,7 @@ class UpdaterController extends PluginController {
         Navigation::activateItem("/tools/studipupdate");
         $this->is_not_writable = $this->notWritableFolders();
         if (count($this->is_not_writable)) {
-            PageLayout::postMessage(
+            $this->postMessage(
                 MessageBox::info(
                     _("Der Webserver hat keine Dateiberechtigungen, um dieses Stud.IP zu updaten. Folgende Dateien bzw. Verzeichnisse sind nicht schreibfähig:"),
                     $this->is_not_writable
@@ -20,10 +24,19 @@ class UpdaterController extends PluginController {
         if ($max_size < 30 * 1024 * 1024) {
             $max_size = floor($max_size / (1024 * 1024));
             if ($max_size < 20) {
-                PageLayout::postMessage(MessageBox::error(sprintf(_("Es dürfen nur %s MB hochgeladen werden. Das ist eventuell zuwenig, um das Update einzuspielen."), $max_size)));
+                $this->postMessage(MessageBox::error(sprintf(_("Es dürfen nur %s MB hochgeladen werden. Das ist eventuell zuwenig, um das Update einzuspielen."), $max_size)));
             } else {
-                PageLayout::postMessage(MessageBox::info(sprintf(_("Es dürfen nur %s MB hochgeladen werden. Das ist vermutlich zuwenig, um das Update einzuspielen."), $max_size)));
+                $this->postMessage(MessageBox::info(sprintf(_("Es dürfen nur %s MB hochgeladen werden. Das ist vermutlich zuwenig, um das Update einzuspielen."), $max_size)));
             }
+        }
+    }
+
+    protected function postMessage($message)
+    {
+        if (method_exists("PageLayout", "postMessage")) {
+            PageLayout::postMessage($message);
+        } else {
+            $this->messages[] = $message;
         }
     }
 
@@ -44,7 +57,7 @@ class UpdaterController extends PluginController {
         Navigation::activateItem("/tools/studipupdate");
         $dir = $GLOBALS['TMP_PATH']."/studip_update_version";
 
-        if (Request::isPost() && $_FILES['new_studip']) {
+        if (count($_POST) && $_FILES['new_studip']) {
             //aufräumen
             if (file_exists($dir)) {
                 @rmdirr($dir);
@@ -65,20 +78,30 @@ class UpdaterController extends PluginController {
             }
         }
 
-        $this->release_notes = @file_get_contents($dir."/ChangeLog");
-        $old_release_notes = @file_get_contents($GLOBALS['ABSOLUTE_PATH_STUDIP']."/../ChangeLog");
+        $this->release_notes = file_get_contents($dir."/ChangeLog");
+        $old_release_notes = file_get_contents($GLOBALS['ABSOLUTE_PATH_STUDIP']."/../ChangeLog");
         if (strpos($this->release_notes, $old_release_notes) !== false) {
             $this->release_notes = substr($this->release_notes, 0, strpos($this->release_notes, $old_release_notes));
         }
+
     }
 
     public function execute_action()
     {
-        if (Request::isPost()) {
+        if (count($_POST)) {
             //nun geht es los
-            $studip_dir = $GLOBALS['ABSOLUTE_PATH_STUDIP']."/../ChangeLog";
+            $studip_dir = $GLOBALS['ABSOLUTE_PATH_STUDIP']."/..";
             $tmp_studip = $GLOBALS['TMP_PATH']."/studip_update_version";
             $already_copied = array(".", "..");
+
+            $entries = (array) @scandir($tmp_studip);
+            if (count($entries) === 3) {
+                foreach ($entries as $entry) {
+                    if ($entry !== "." && $entry !== "..") {
+                        $tmp_studip .= "/".$entry;
+                    }
+                }
+            }
 
             //config
             foreach (scandir($tmp_studip."/config") as $file) {
@@ -90,8 +113,10 @@ class UpdaterController extends PluginController {
 
             //public
             $already_copied_public = array(".", "..", "pictures");
-            @rmdirr($studip_dir."/public/plugins_packages/core");
-            copy($tmp_studip."/public/plugins_packages/core", $studip_dir."/public/plugins_packages/core");
+            if (file_exists($tmp_studip."/public/plugins_packages/core")) {
+                @rmdirr($studip_dir."/public/plugins_packages/core");
+                $this->copy($tmp_studip."/public/plugins_packages/core", $studip_dir."/public/plugins_packages/core");
+            }
             $already_copied_public[] = "plugins_packages";
             $already_copied_public[] = ".htaccess";
             foreach (scandir($studip_dir."/public") as $file) {
@@ -101,7 +126,8 @@ class UpdaterController extends PluginController {
             }
             foreach (scandir($tmp_studip."/public") as $file) {
                 if (!in_array($file, $already_copied_public)) {
-                    copy($tmp_studip."/public/".$file, $studip_dir."/public/".$file);
+                    @rmdirr($studip_dir."/public/".$file);
+                    $this->copy($tmp_studip."/public/".$file, $studip_dir."/public/".$file);
                 }
             }
             $already_copied[] = "public";
@@ -117,13 +143,15 @@ class UpdaterController extends PluginController {
             }
             foreach (scandir($tmp_studip) as $file) {
                 if (!in_array($file, $already_copied)) {
-                    copy($tmp_studip."/".$file, $studip_dir."/".$file);
+                    @rmdirr($studip_dir."/".$file);
+                    $this->copy($tmp_studip."/".$file, $studip_dir."/".$file);
                 }
             }
 
-            PageLayout::postMessage(MessageBox::success(_("Programmdateien erfolgreich geupdated.")));
-            header("Location: web_migrate.php");
+            $this->postMessage(MessageBox::success(_("Programmdateien erfolgreich geupdated.")));
+            header("Location: ".$GLOBALS['ABSOLUTE_URI_STUDIP']."web_migrate.php");
         }
+        $this->render_nothing();
     }
 
     protected function notWritableFolders()
@@ -139,13 +167,28 @@ class UpdaterController extends PluginController {
                 foreach (scandir($dir."/".$file) as $subfile) {
 
                     if ($subfile !== ".." && $subfile !== "." && !in_array($file."/".$subfile, $unnecessary_subfiles)
-                            && !is_writable($dir."/".$file."/".$subfile)) {
+                        && !is_writable($dir."/".$file."/".$subfile)) {
                         $is_not_writable[] = $file."/".$subfile;
                     }
                 }
             }
         }
         return $is_not_writable;
+    }
+
+    protected function copy($src, $dst) {
+        if (is_file($src)) {
+            return copy($src, $dst);
+        } else {
+            $dir = opendir($src);
+            @mkdir($dst);
+            while(false !== ($file = readdir($dir))) {
+                if (($file !== '.') && ($file !== '..')) {
+                    $this->copy($src."/".$file, $dst."/" .$file);
+                }
+            }
+            closedir($dir);
+        }
     }
 
 }
