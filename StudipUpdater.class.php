@@ -36,7 +36,7 @@ class StudipUpdater extends StudIPPlugin implements SystemPlugin {
                     sprintf(_("Service Release %s ist verfügbar. Bitte updaten Sie so schnell wie möglich."), $new_service_release),
                     array(
                         '<a href="'.$versions[$new_service_release]['link'].'" target="_blank">'.Assets::img("icons/20/blue/download", array('class' => "text-bottom")).' '._("Jetzt downloaden").'</a>',
-                        '<a href="'.PluginEngine::getLink($this, array(), "updater/index").'" target="_blank">'.Assets::img("icons/20/blue/upload", array('class' => "text-bottom")).' '._("Heruntergeladenes ZIP einspielen").'</a>'
+                        '<a href="'.PluginEngine::getLink($this, array(), "updater/index").'">'.Assets::img("icons/20/blue/upload", array('class' => "text-bottom")).' '._("Heruntergeladenes ZIP einspielen").'</a>'
                     )
                 );
                 if (stripos($_SERVER['REQUEST_URI'], "index.php") !== false) {
@@ -51,7 +51,7 @@ class StudipUpdater extends StudIPPlugin implements SystemPlugin {
                     _("Neue Stud.IP Version %s ist verfügbar."), $new_version),
                     array(
                         '<a href="'.$versions[$new_version]['link'].'" target="_blank">'.Assets::img("icons/20/blue/download", array('class' => "text-bottom")).' '._("Jetzt downloaden").'</a>',
-                        '<a href="'.PluginEngine::getLink($this, array(), "updater/index").'" target="_blank">'.Assets::img("icons/20/blue/upload", array('class' => "text-bottom")).' '._("Heruntergeladenes ZIP einspielen").'</a>'
+                        '<a href="'.PluginEngine::getLink($this, array(), "updater/index").'">'.Assets::img("icons/20/blue/upload", array('class' => "text-bottom")).' '._("Heruntergeladenes ZIP einspielen").'</a>'
                     )
                 );
                 if (stripos($_SERVER['REQUEST_URI'], "index.php") !== false) {

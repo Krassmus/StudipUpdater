@@ -10,11 +10,12 @@
     <div>
         <h2><?= _("Was passiert beim Klick auf den Update-Ausführen Button?") ?></h2>
         <ul>
-            <li><?= _("Die Stud.IP PHP-Programmdateien werden ersetzt.") ?></li>
-            <li><?= _("Dann fehlen aber noch die Migrationen in der Datenbank. Sie werden sofort auf der Seite web_migrate.php landen, wo Sie die Datenbankmigration von Hand anstoßen werden. Diese Migrationen können auch etwas länger dauern. Keine Bange, das ist okay so.") ?></li>
-            <li><?= _("Danach ist Ihr System geupdated!") ?></li>
+            <li><?= _("Ein neues Stud.IP-Fenster öffnet sich (in einem neuen Reiter).") ?></li>
+            <li><?= _("Die Stud.IP PHP-Programmdateien werden im Hintergrund ersetzt.") ?></li>
+            <li><?= _("Dann fehlen aber noch die Migrationen in der Datenbank. In dem neuen Fenster wird Seite web_migrate.php dargestellt, auf der Sie die Datenbankmigration von Hand anstoßen sollen. Diese Migrationen können auch etwas länger dauern. Keine Bange, das ist okay so.") ?></li>
+            <li><?= _("Schließen Sie jetzt das neue Fenster, sodass Sie wieder hier her zurückkehren.") ?></li>
         </ul>
-        <form action="<?= PluginEngine::getLink($plugin, array(), "updater/execute") ?>" method="post">
+        <form action="<?= PluginEngine::getLink($plugin, array(), "updater/execute") ?>" method="post" target="_blank">
             <?= \Studip\Button::create(_("Update ausführen!"), "execute_update", array('return window.confirm("'._("Wirklich das Update durchführen?").'");')) ?>
         </form>
     </div>

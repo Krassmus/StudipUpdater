@@ -7,12 +7,12 @@ class UpdaterController extends PluginController {
     public function index_action()
     {
         Navigation::activateItem("/tools/studipupdate");
-        $is_not_writable = $this->notWritableFolders();
-        if (count($is_not_writable)) {
+        $this->is_not_writable = $this->notWritableFolders();
+        if (count($this->is_not_writable)) {
             PageLayout::postMessage(
                 MessageBox::info(
                     _("Der Webserver hat keine Dateiberechtigungen, um dieses Stud.IP zu updaten. Folgende Dateien bzw. Verzeichnisse sind nicht schreibfähig:"),
-                    $is_not_writable
+                    $this->is_not_writable
                 )
             );
         }
