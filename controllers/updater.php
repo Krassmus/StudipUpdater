@@ -1,6 +1,6 @@
 <?php
 
-if (file_exists($GLOBALS['STUDIP_BASE_PATH'].'app/controllers/plugin_controller.php')) {
+if (file_exists($GLOBALS['STUDIP_BASE_PATH'].'/app/controllers/plugin_controller.php')) {
     include_once 'app/controllers/plugin_controller.php';
 } else {
     include_once __DIR__."/plugin_controller.php";
