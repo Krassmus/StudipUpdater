@@ -52,6 +52,71 @@ class UpdaterController extends PluginController {
         }
     }
 
+    public function precheck_action()
+    {
+        Navigation::activateItem("/tools/studipupdate");
+        $redirect = true;
+        $this->is_not_writable = $this->notWritableFolders();
+        if (count($this->is_not_writable)) {
+            $this->postMessage(
+                MessageBox::info(
+                    _("Der Webserver hat keine Dateiberechtigungen, um dieses Stud.IP zu updaten. Folgende Dateien bzw. Verzeichnisse sind nicht schreibfähig:"),
+                    $this->is_not_writable
+                )
+            );
+            $redirect = false;
+        }
+        $max_size = min(self::parse_size(ini_get('post_max_size')), self::parse_size(ini_get('upload_max_filesize')));
+        if ($max_size < 30 * 1024 * 1024) {
+            $max_size = floor($max_size / (1024 * 1024));
+            if ($max_size < 20) {
+                $this->postMessage(MessageBox::error(sprintf(_("Es dürfen nur %s MB hochgeladen werden. Das ist eventuell zuwenig, um das Update einzuspielen."), $max_size)));
+            } else {
+                $this->postMessage(MessageBox::info(sprintf(_("Es dürfen nur %s MB hochgeladen werden. Das ist vermutlich zuwenig, um das Update einzuspielen."), $max_size)));
+            }
+            $redirect = false;
+        }
+        if ($redirect) {
+            $this->redirect("updater/download");
+        }
+    }
+
+    public function get_studip_action()
+    {
+        Navigation::activateItem("/tools/studipupdate");
+        $this->service_release = $this->plugin->getVersion(true);
+        $this->release = $this->plugin->getVersion(false);
+        if (Request::isPost()) {
+            $dir = $GLOBALS['TMP_PATH']."/studip_update_version";
+            $zip = $GLOBALS['TMP_PATH']."/studip_update_version.zip";
+
+            //aufräumen
+            if (file_exists($dir)) {
+                @rmdirr($dir);
+            }
+            @unlink($zip);
+
+            if (Request::submitted("service_release")) {
+                $url = "https://develop.studip.de/studip/plugins.php/studipdownloader/download/stable-".$this->service_release;
+                file_put_contents($zip, file_get_contents($url));
+            }
+            if (Request::submitted("release")) {
+                $url = "https://develop.studip.de/studip/plugins.php/studipdownloader/download/stable-".$this->release;
+                file_put_contents($zip, file_get_contents($url));
+            }
+            if ($_FILES['new_studip'] && $_FILES['new_studip']['tmp_name']) {
+                copy($_FILES['new_studip']['tmp_name'], $zip);
+            }
+
+            //Ordner erstellen und wieder aufräumen:
+            mkdir($dir);
+            unzip_file($zip, $dir);
+            @unlink($zip);
+
+            $this->redirect("updater/check");
+        }
+    }
+
     public function check_action()
     {
         Navigation::activateItem("/tools/studipupdate");
