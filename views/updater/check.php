@@ -11,14 +11,22 @@
         <div>
             <h2><?= _("Was passiert beim Klick auf den Update-Ausführen Button?") ?></h2>
             <ul>
-                <li><?= _("Ein neues Stud.IP-Fenster öffnet sich (in einem neuen Reiter).") ?></li>
                 <li><?= _("Die Stud.IP PHP-Programmdateien werden im Hintergrund ersetzt.") ?></li>
-                <li><?= _("Dann fehlen aber noch die Migrationen in der Datenbank. In dem neuen Fenster wird Seite web_migrate.php dargestellt, auf der Sie die Datenbankmigration von Hand anstoßen sollen. Diese Migrationen können auch etwas länger dauern. Keine Bange, das ist okay so.") ?></li>
-                <li><?= _("Schließen Sie jetzt das neue Fenster, sodass Sie wieder hier her zurückkehren.") ?></li>
+                <li><?= _("Ein neues Fenster öffnet sich (ein neuer Browser-Tab), wo Sie die Datenbank migrieren können.") ?></li>
+                <li><?= _("Danach ist das System geupdated und brandneu!") ?></li>
+                <li><?= _("Eventuell sind bei dem Update einige Plugins deaktiviert worden, die nicht kompatibel zu sein scheinen. Gehen Sie im Anschluss an das Update in die Pluginverwaltung und updaten Sie die betroffenen Plugins und aktivieren Sie diese wieder.") ?></li>
             </ul>
             <form action="<?= PluginEngine::getLink($plugin, array(), "updater/execute") ?>" method="post" target="_blank">
                 <?= \Studip\Button::create(_("Update ausführen!"), "execute_update", array('return window.confirm("'._("Wirklich das Update durchführen?").'");')) ?>
             </form>
+
+            <h2><?= _("Was kann man machen, falls etwas schief gehen sollte?") ?></h2>
+            <ul>
+                <li><?= _("Normalerweise sollte nichts schief gehen. Aber man sollte niemals nie sagen. Führen Sie am besten vor dem Update immer eine Sicherung des gesamten Systems durch.") ?></li>
+                <li><?= sprintf(_("Wenn doch noch etwas schief gehen sollte, gehen Sie auf die Seite %sweb_migrate.php%s und führen Sie dort die Migrationen von Hand aus."), '<a href="'.URLHelper::getLink("web_migrate.php").'" target="_blank">', '</a>') ?></li>
+                <li><?= _("Wenn das nicht möglich sein sollte oder es nichts hilft, melden Sie sich bei der Stud.IP-Community auf https://develop.studip.de und fragen dort nach Rat.") ?></li>
+                <li><?= _("Letztenendes wird es auch helfen, eine vorher durchgeführte Sicherung wieder einzuspielen.") ?></li>
+            </ul>
         </div>
     <? endif ?>
 <? endif ?>

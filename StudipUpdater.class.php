@@ -27,7 +27,6 @@ class StudipUpdater extends StudIPPlugin implements SystemPlugin {
                 } else {
                     PageLayout::postMessage($message);
                 }
-
             }
             if ($new_version) {
                 $message = MessageBox::info(sprintf(
@@ -74,7 +73,7 @@ class StudipUpdater extends StudIPPlugin implements SystemPlugin {
     }
 
     protected function getVersions() {
-        $versions = StudipCacheFactory::getCache()->read("STUDIPUPDATER-sourceforgeversions");
+        $versions = unserialize(StudipCacheFactory::getCache()->read("STUDIPUPDATER-sourceforgeversions"));
         if ($versions) {
             return $versions;
         } else {
@@ -94,7 +93,7 @@ class StudipUpdater extends StudIPPlugin implements SystemPlugin {
                     }
                 }
             }
-            StudipCacheFactory::getCache()->write("STUDIPUPDATER-sourceforgeversions", $versions, 60);
+            StudipCacheFactory::getCache()->write("STUDIPUPDATER-sourceforgeversions", serialize($versions), 60);
             return $versions;
         }
     }

@@ -6,6 +6,10 @@ if (file_exists($GLOBALS['STUDIP_BASE_PATH'].'/app/controllers/plugin_controller
     include_once __DIR__."/plugin_controller.php";
 }
 
+require_once 'lib/migrations/db_migration.php';
+require_once 'lib/migrations/db_schema_version.php';
+require_once 'lib/migrations/migrator.php';
+
 class UpdaterController extends PluginController {
 
     public function index_action()
@@ -165,6 +169,7 @@ class UpdaterController extends PluginController {
     {
         if (count($_POST)) {
             //nun geht es los
+            set_time_limit(0);
             $studip_dir = $GLOBALS['ABSOLUTE_PATH_STUDIP']."/..";
             $tmp_studip = $GLOBALS['TMP_PATH']."/studip_update_version";
             $already_copied = array(".", "..");
@@ -224,7 +229,20 @@ class UpdaterController extends PluginController {
             }
 
             $this->postMessage(MessageBox::success(_("Programmdateien erfolgreich geupdated.")));
+
             header("Location: ".URLHelper::getURL("web_migrate.php"));
+
+            //Now web_migrate:
+            /*$version = new DBSchemaVersion('studip');
+            $path = $GLOBALS['STUDIP_BASE_PATH'].'/db/migrations';
+            $verbose = false;
+            $target = NULL;
+            $migrator = new Migrator($path, $version, $verbose);
+            $migrator->migrate_to($target);
+            $this->postMessage(MessageBox::success(sprintf(_("Datenbank wurde migriert! Sie haben nun Stud.IP '%s'"), file_get_contents($GLOBALS['STUDIP_BASE_PATH']."/VERSION"))));
+
+            header("Location: ".URLHelper::getURL("web_migrate.php"));
+            */
         }
         $this->render_nothing();
     }
