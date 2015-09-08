@@ -15,7 +15,7 @@ class UpdaterController extends PluginController {
         if (count($this->is_not_writable)) {
             $this->postMessage(
                 MessageBox::info(
-                    _("Der Webserver hat keine Dateiberechtigungen, um dieses Stud.IP zu updaten. Folgende Dateien bzw. Verzeichnisse sind nicht schreibfähig:"),
+                    _("Der Webserver hat keine Dateiberechtigungen, um dieses Stud.IP zu updaten. Folgende Dateien bzw. Verzeichnisse sind nicht schreibfï¿½hig:"),
                     $this->is_not_writable
                 )
             );
@@ -24,9 +24,9 @@ class UpdaterController extends PluginController {
         if ($max_size < 30 * 1024 * 1024) {
             $max_size = floor($max_size / (1024 * 1024));
             if ($max_size < 20) {
-                $this->postMessage(MessageBox::error(sprintf(_("Es dürfen nur %s MB hochgeladen werden. Das ist eventuell zuwenig, um das Update einzuspielen."), $max_size)));
+                $this->postMessage(MessageBox::error(sprintf(_("Es dï¿½rfen nur %s MB hochgeladen werden. Das ist eventuell zuwenig, um das Update einzuspielen."), $max_size)));
             } else {
-                $this->postMessage(MessageBox::info(sprintf(_("Es dürfen nur %s MB hochgeladen werden. Das ist vermutlich zuwenig, um das Update einzuspielen."), $max_size)));
+                $this->postMessage(MessageBox::info(sprintf(_("Es dï¿½rfen nur %s MB hochgeladen werden. Das ist vermutlich zuwenig, um das Update einzuspielen."), $max_size)));
             }
         }
     }
@@ -60,7 +60,7 @@ class UpdaterController extends PluginController {
         if (count($this->is_not_writable)) {
             $this->postMessage(
                 MessageBox::info(
-                    _("Der Webserver hat keine Dateiberechtigungen, um dieses Stud.IP zu updaten. Folgende Dateien bzw. Verzeichnisse sind nicht schreibfähig:"),
+                    _("Der Webserver hat keine Dateiberechtigungen, um dieses Stud.IP zu updaten. Folgende Dateien bzw. Verzeichnisse sind nicht schreibfï¿½hig:"),
                     $this->is_not_writable
                 )
             );
@@ -81,7 +81,7 @@ class UpdaterController extends PluginController {
         }
     }
 
-    public function get_studip_action()
+    public function download_action()
     {
         Navigation::activateItem("/tools/studipupdate");
         $this->service_release = $this->plugin->getVersion(true);
@@ -121,6 +121,16 @@ class UpdaterController extends PluginController {
     {
         Navigation::activateItem("/tools/studipupdate");
         $dir = $GLOBALS['TMP_PATH']."/studip_update_version";
+
+        $this->is_not_writable = $this->notWritableFolders();
+        if (count($this->is_not_writable)) {
+            $this->postMessage(
+                MessageBox::info(
+                    _("Der Webserver hat keine Dateiberechtigungen, um dieses Stud.IP zu updaten. Folgende Dateien bzw. Verzeichnisse sind nicht schreibfï¿½hig:"),
+                    $this->is_not_writable
+                )
+            );
+        }
 
         if (count($_POST) && $_FILES['new_studip']) {
             //aufräumen

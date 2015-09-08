@@ -19,8 +19,7 @@ class StudipUpdater extends StudIPPlugin implements SystemPlugin {
                 $message = MessageBox::info(
                     sprintf(_("Service Release %s ist verfügbar. Bitte updaten Sie so schnell wie möglich."), $new_service_release),
                     array(
-                        '<a href="'.$versions[$new_service_release]['link'].'" target="_blank">'.Assets::img("icons/20/blue/download", array('class' => "text-bottom")).' '._("Jetzt downloaden").'</a>',
-                        '<a href="'.PluginEngine::getLink($this, array(), "updater/index").'" target="_blank">'.Assets::img("icons/20/blue/upload", array('class' => "text-bottom")).' '._("Heruntergeladenes ZIP einspielen").'</a>'
+                        '<form action="'.PluginEngine::getLink($this, array(), "updater/download").'" method="post">'.\Studip\Button::create(_("Jetzt installieren"), 'service_release', array('value' => $new_service_release)).'</form>',
                     )
                 );
                 if (stripos($_SERVER['REQUEST_URI'], "index.php") !== false) {
@@ -34,8 +33,7 @@ class StudipUpdater extends StudIPPlugin implements SystemPlugin {
                 $message = MessageBox::info(sprintf(
                     _("Neue Stud.IP Version %s ist verfügbar."), $new_version),
                     array(
-                        '<a href="'.$versions[$new_version]['link'].'" target="_blank">'.Assets::img("icons/20/blue/download", array('class' => "text-bottom")).' '._("Jetzt downloaden").'</a>',
-                        '<a href="'.PluginEngine::getLink($this, array(), "updater/index").'" target="_blank">'.Assets::img("icons/20/blue/upload", array('class' => "text-bottom")).' '._("Heruntergeladenes ZIP einspielen").'</a>'
+                        '<form action="'.PluginEngine::getLink($this, array(), "updater/download").'" method="post">'.\Studip\Button::create(_("Jetzt installieren"), 'release', array('value' => $new_version)).'</form>',
                     )
                 );
                 if (stripos($_SERVER['REQUEST_URI'], "index.php") !== false) {
