@@ -77,24 +77,29 @@ class StudipUpdater extends StudIPPlugin implements SystemPlugin {
         if ($versions) {
             return $versions;
         } else {
-            $atom = DOMDocument::loadXML(file_get_contents(self::$rssURL));
-            $versions = array();
-            foreach ($atom->getElementsByTagName("item") as $item) {
-                $version_value = array();
-                foreach ($item->childNodes as $child) {
-                    $version_value[$child->nodeName] = $child->nodeValue;
-                }
-                if (stripos($version_value['title'], ".zip") !== false) {
+            $rss = @file_get_contents(self::$rssURL);
+            if ($rss) {
+                $atom = DOMDocument::loadXML($rss);
+                $versions = array();
+                foreach ($atom->getElementsByTagName("item") as $item) {
+                    $version_value = array();
+                    foreach ($item->childNodes as $child) {
+                        $version_value[$child->nodeName] = $child->nodeValue;
+                    }
+                    if (stripos($version_value['title'], ".zip") !== false) {
 
-                    preg_match("/studip\-([\d\.]*?)\.zip/", $version_value['title'], $matches);
-                    $version = $matches[1];
-                    if ($version) {
-                        $versions[$version] = $version_value;
+                        preg_match("/studip\-([\d\.]*?)\.zip/", $version_value['title'], $matches);
+                        $version = $matches[1];
+                        if ($version) {
+                            $versions[$version] = $version_value;
+                        }
                     }
                 }
+                StudipCacheFactory::getCache()->write("STUDIPUPDATER-sourceforgeversions", serialize($versions), 60);
+                return $versions;
+            } else {
+                return array();
             }
-            StudipCacheFactory::getCache()->write("STUDIPUPDATER-sourceforgeversions", serialize($versions), 60);
-            return $versions;
         }
     }
 
