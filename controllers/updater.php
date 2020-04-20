@@ -1,15 +1,5 @@
 <?php
 
-if (file_exists($GLOBALS['STUDIP_BASE_PATH'].'/app/controllers/plugin_controller.php')) {
-    include_once 'app/controllers/plugin_controller.php';
-} else {
-    include_once __DIR__."/plugin_controller.php";
-}
-
-require_once 'lib/migrations/db_migration.php';
-require_once 'lib/migrations/db_schema_version.php';
-require_once 'lib/migrations/migrator.php';
-
 class UpdaterController extends PluginController {
 
     public function index_action()
@@ -19,18 +9,18 @@ class UpdaterController extends PluginController {
         if (count($this->is_not_writable)) {
             $this->postMessage(
                 MessageBox::info(
-                    _("Der Webserver hat keine Dateiberechtigungen, um dieses Stud.IP zu updaten. Folgende Dateien bzw. Verzeichnisse sind nicht schreibf�hig:"),
+                    _("Der Webserver hat keine Dateiberechtigungen, um dieses Stud.IP zu updaten. Folgende Dateien bzw. Verzeichnisse sind nicht schreibfähig:"),
                     $this->is_not_writable
                 )
             );
         }
         $max_size = min(self::parse_size(ini_get('post_max_size')), self::parse_size(ini_get('upload_max_filesize')));
-        if ($max_size < 30 * 1024 * 1024) {
+        if ($max_size < 120 * 1024 * 1024) {
             $max_size = floor($max_size / (1024 * 1024));
             if ($max_size < 20) {
-                $this->postMessage(MessageBox::error(sprintf(_("Es d�rfen nur %s MB hochgeladen werden. Das ist eventuell zuwenig, um das Update einzuspielen."), $max_size)));
+                $this->postMessage(MessageBox::error(sprintf(_("Es dürfen nur %s MB hochgeladen werden. Das ist eventuell zuwenig, um das Update einzuspielen."), $max_size)));
             } else {
-                $this->postMessage(MessageBox::info(sprintf(_("Es d�rfen nur %s MB hochgeladen werden. Das ist vermutlich zuwenig, um das Update einzuspielen."), $max_size)));
+                $this->postMessage(MessageBox::info(sprintf(_("Es dürfen nur %s MB hochgeladen werden. Das ist vermutlich zuwenig, um das Update einzuspielen."), $max_size)));
             }
         }
     }
@@ -64,19 +54,19 @@ class UpdaterController extends PluginController {
         if (count($this->is_not_writable)) {
             $this->postMessage(
                 MessageBox::info(
-                    _("Der Webserver hat keine Dateiberechtigungen, um dieses Stud.IP zu updaten. Folgende Dateien bzw. Verzeichnisse sind nicht schreibf�hig:"),
+                    _("Der Webserver hat keine Dateiberechtigungen, um dieses Stud.IP zu updaten. Folgende Dateien bzw. Verzeichnisse sind nicht schreibfähig:"),
                     $this->is_not_writable
                 )
             );
             $redirect = false;
         }
         $max_size = min(self::parse_size(ini_get('post_max_size')), self::parse_size(ini_get('upload_max_filesize')));
-        if ($max_size < 30 * 1024 * 1024) {
+        if ($max_size < 120 * 1024 * 1024) {
             $max_size = floor($max_size / (1024 * 1024));
             if ($max_size < 20) {
-                $this->postMessage(MessageBox::error(sprintf(_("Es d�rfen nur %s MB hochgeladen werden. Das ist eventuell zuwenig, um das Update einzuspielen."), $max_size)));
+                $this->postMessage(MessageBox::error(sprintf(_("Es dürfen nur %s MB hochgeladen werden. Das ist eventuell zuwenig, um das Update einzuspielen."), $max_size)));
             } else {
-                $this->postMessage(MessageBox::info(sprintf(_("Es d�rfen nur %s MB hochgeladen werden. Das ist vermutlich zuwenig, um das Update einzuspielen."), $max_size)));
+                $this->postMessage(MessageBox::info(sprintf(_("Es dürfen nur %s MB hochgeladen werden. Das ist vermutlich zuwenig, um das Update einzuspielen."), $max_size)));
             }
             $redirect = false;
         }
@@ -94,7 +84,7 @@ class UpdaterController extends PluginController {
             $dir = $GLOBALS['TMP_PATH']."/studip_update_version";
             $zip = $GLOBALS['TMP_PATH']."/studip_update_version.zip";
 
-            //aufr�umen
+            //aufräumen
             if (file_exists($dir)) {
                 @rmdirr($dir);
             }
@@ -112,9 +102,9 @@ class UpdaterController extends PluginController {
                 copy($_FILES['new_studip']['tmp_name'], $zip);
             }
 
-            //Ordner erstellen und wieder aufr�umen:
+            //Ordner erstellen und wieder aufräumen:
             mkdir($dir);
-            unzip_file($zip, $dir);
+            \Studip\ZipArchive::extractToPath($zip, $dir);
             @unlink($zip);
 
             $this->redirect("updater/check");
@@ -130,21 +120,21 @@ class UpdaterController extends PluginController {
         if (count($this->is_not_writable)) {
             $this->postMessage(
                 MessageBox::info(
-                    _("Der Webserver hat keine Dateiberechtigungen, um dieses Stud.IP zu updaten. Folgende Dateien bzw. Verzeichnisse sind nicht schreibf�hig:"),
+                    _("Der Webserver hat keine Dateiberechtigungen, um dieses Stud.IP zu updaten. Folgende Dateien bzw. Verzeichnisse sind nicht schreibfähig:"),
                     $this->is_not_writable
                 )
             );
         }
 
         if (count($_POST) && $_FILES['new_studip']) {
-            //aufr�umen
+            //aufräumen
             if (file_exists($dir)) {
                 @rmdirr($dir);
             }
             @unlink($dir.".zip");
             copy($_FILES['new_studip']['tmp_name'], $dir.".zip");
             mkdir($dir);
-            unzip_file($dir.".zip", $dir);
+            \Studip\ZipArchive::extractToPath($dir.".zip", $dir);
             @unlink($dir.".zip");
         }
 
@@ -157,7 +147,7 @@ class UpdaterController extends PluginController {
             }
         }
 
-        $this->release_notes = file_get_contents($dir."/ChangeLog");
+        $this->release_notes = @file_get_contents($dir."/ChangeLog");
         $old_release_notes = file_get_contents($GLOBALS['ABSOLUTE_PATH_STUDIP']."/../ChangeLog");
         if (strpos($this->release_notes, $old_release_notes) !== false) {
             $this->release_notes = substr($this->release_notes, 0, strpos($this->release_notes, $old_release_notes));
@@ -167,7 +157,7 @@ class UpdaterController extends PluginController {
 
     public function execute_action()
     {
-        if (count($_POST)) {
+        if (Request::isPost()) {
             //nun geht es los
             set_time_limit(0);
             $studip_dir = $GLOBALS['ABSOLUTE_PATH_STUDIP']."/..";
@@ -229,20 +219,7 @@ class UpdaterController extends PluginController {
             }
 
             $this->postMessage(MessageBox::success(_("Programmdateien erfolgreich geupdated.")));
-
             header("Location: ".URLHelper::getURL("web_migrate.php"));
-
-            //Now web_migrate:
-            /*$version = new DBSchemaVersion('studip');
-            $path = $GLOBALS['STUDIP_BASE_PATH'].'/db/migrations';
-            $verbose = false;
-            $target = NULL;
-            $migrator = new Migrator($path, $version, $verbose);
-            $migrator->migrate_to($target);
-            $this->postMessage(MessageBox::success(sprintf(_("Datenbank wurde migriert! Sie haben nun Stud.IP '%s'"), file_get_contents($GLOBALS['STUDIP_BASE_PATH']."/VERSION"))));
-
-            header("Location: ".URLHelper::getURL("web_migrate.php"));
-            */
         }
         $this->render_nothing();
     }
@@ -251,15 +228,17 @@ class UpdaterController extends PluginController {
     {
         $dir = $GLOBALS['ABSOLUTE_PATH_STUDIP']."/..";
         $is_not_writable = array();
+        $unnecessary_files = array(
+            "config/config.inc.php", "config/config_local.inc.php", "public/.htaccess"
+        );
         foreach (scandir($dir) as $file) {
-            if ($file !== ".." && !is_writable($dir."/".$file)) {
+            if ($file !== ".." && !is_writable($dir."/".$file) && !in_array($file, $unnecessary_files)) {
                 $is_not_writable[] = $file;
             }
             if ($file !== ".." && $file !== "." && is_dir($dir."/".$file)) {
-                $unnecessary_subfiles = array("config/config.inc.php", "config/config_local.inc.php", "public/.htaccess");
                 foreach (scandir($dir."/".$file) as $subfile) {
 
-                    if ($subfile !== ".." && $subfile !== "." && !in_array($file."/".$subfile, $unnecessary_subfiles)
+                    if ($subfile !== ".." && $subfile !== "." && !in_array($file."/".$subfile, $unnecessary_files)
                         && !is_writable($dir."/".$file."/".$subfile)) {
                         $is_not_writable[] = $file."/".$subfile;
                     }
